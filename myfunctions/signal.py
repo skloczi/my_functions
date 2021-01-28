@@ -95,7 +95,7 @@ def deconvo(s1, s2, WL):
     n = max(len(s1), len(s2))
     S2=fftpack.fft(s2,n)
     S2a=abs(S2)
-    S2new = np.zeros(len(S2),dtype = "complex_")
+    S2new = np.zeros(len(S2),dtype = "complex")
     WL2 = max(S2a) * WL / 100
 
     for i in range(len(S2new)):
