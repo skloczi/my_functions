@@ -2,7 +2,7 @@ import numpy as np
 import math
 from scipy import signal, fftpack
 from scipy.signal import butter, sosfilt, zpk2sos, iirfilter
-
+import matplotlib.pyplot as plt
 
 ## Damaged signals removal
 def rm_damaged_signal(signal_array, threshold, rm_first = False, first = 0):
@@ -300,3 +300,51 @@ def butter_highpass(data, cutoff, fs, corners=4, zerophase=False):
         return sosfilt(sos, firstpass[::-1])[::-1]
     else:
         return sosfilt(sos, data)
+
+# moving window fft
+def moving_window_fft(data, win_len, step, fs, plot = False):
+    """Function to calculate an average of the moving window FFT. Window used is
+    a Hanning window.
+
+    Parameters
+    ----------
+    data    :   array_like
+        Signal data in time domain
+    win_len :   int
+        Hanning window lenght as a number of data points taken under consideration
+    step    :   int
+        Step of a moving Window
+    fs      :   int
+        Sampling frequency of the analyzed signal
+    plot    : bool
+        If True, a plot of the operation happening will be shown
+
+    Returns
+    -------
+    An average of the moving window Fourier transform of the signal. average
+    is calcualted by dividing of the sum by the number of considered windows.
+    """
+    hann_win = np.hanning(win_len +1)[:-1]
+    freqaxis =  fftpack.rfftfreq(win_len, d=1./fs)
+    number = 0
+    for n in range(0,len(data)-win_len,step):
+        temp_data = data[n:(n+win_len)]
+        temp_window = temp_data * hann_win
+        temp_fft = fftpack.rfft(temp_window)
+        temp_abs_fft = abs(temp_fft)
+        if number == 0:
+            abs_fft_tot_X = temp_abs_fft
+        else:
+            abs_fft_tot_X += temp_abs_fft
+        number += 1
+
+    if plot == True:
+        fig, ax = plt.subplots(figsize = (15,7))
+        ax.loglog(freqaxis,abs_fft_tot_X/number, label = "X")
+        ax.set_xlabel("Frequency [Hz]", fontsize = 20)
+        ax.set_ylabel("Amplitude", fontsize = 20)
+        ax.set_title("Moving window FFT", fontsize = 20)
+        ax.legend()
+        plt.show()
+
+    return abs_fft_tot_X/number
