@@ -302,7 +302,7 @@ def butter_highpass(data, cutoff, fs, corners=4, zerophase=False):
         return sosfilt(sos, data)
 
 # moving window fft
-def moving_window_fft(data, win_len, step, fs, plot = False):
+def moving_window_fft(data, win_len, step, fs, plot = False, freq_axis = False):
     """Function to calculate an average of the moving window FFT. Window used is
     a Hanning window.
 
@@ -347,4 +347,7 @@ def moving_window_fft(data, win_len, step, fs, plot = False):
         ax.legend()
         plt.show()
 
-    return abs_fft_tot_X/number
+    if freq_axis == True:
+        return abs_fft_tot_X/number
+    else:
+        return abs_fft_tot_X/number, freqaxis
