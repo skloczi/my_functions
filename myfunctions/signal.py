@@ -348,6 +348,6 @@ def moving_window_fft(data, win_len, step, fs, plot = False, freq_axis = False):
         plt.show()
 
     if freq_axis == True:
-        return abs_fft_tot_X/number
-    else:
         return abs_fft_tot_X/number, freqaxis
+    else:
+        return abs_fft_tot_X/number
