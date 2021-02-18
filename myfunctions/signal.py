@@ -70,15 +70,15 @@ def rm_damaged_signal(signal_array, threshold, rm_first = False, first = 0):
 
 
 ## Deconvolution
-def deconvo(s1, s2, WL):
+def deconvo(s1, s2, WL, freq_domain = False):
     """Deconvolution of two signals with water-level regularization technique
 
     Parameters
     ----------
     s1 :    array_like
-        Reference time signal
-    s2 :    array_like
         Deconvolved time signal
+    s2 :    array_like
+        Reference time signal
     WL	:    float
         Water level - minmun spectrum level in % compared to the max of the specturm
 
@@ -108,8 +108,37 @@ def deconvo(s1, s2, WL):
 
     S1 = fftpack.fft(s1, n)
     CC = S1 / S2new
-    cc = np.real(fftpack.ifft(CC))
-    return cc
+    if freq_domain == True:
+        return CC
+    else:
+        cc = np.real(fftpack.ifft(CC))
+        return cc
+
+def freq_deconvo(s1, s2, WL):
+    S2a=abs(s2)
+    s1 = abs(s1)
+    S2new = np.zeros(np.shape(s2),dtype = "complex")
+    if s2.ndim == 1:
+        WL2 = max(S2a) * WL / 100
+        for i in range(np.shape(S2new)[0]):
+            if S2a[i] == 0:
+                S2new[i] = WL2
+            elif S2a[i] < WL2: #and np.isclose(S2a[i],0):
+                S2new[i] = WL2 * s2[i]/S2a[i]
+            elif S2a[i] >= WL2:
+                S2new[i] = s2[i]
+    else:
+        for kk in range(np.shape(s2)[1]):
+            WL2 = max(S2a[:,kk]) * WL / 100
+            for i in range(np.shape(S2new)[0]):
+                if S2a[i,kk] == 0:
+                    S2new[i,kk] = WL2
+                elif S2a[i,kk] < WL2: #and np.isclose(S2a[i],0):
+                    S2new[i,kk] = WL2 * s2[i,kk]/S2a[i,kk]
+                elif S2a[i,kk] >= WL2:
+                    S2new[i,kk] = s2[i,kk]
+    CC = s1 / S2new
+    return CC
 
 ## Seismic interferometry by deconvolution
 def interfer_deconvo(s1, s2, wl, r, dstack, Fs, t_ax = False):
