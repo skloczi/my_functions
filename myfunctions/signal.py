@@ -380,3 +380,51 @@ def moving_window_fft(data, win_len, step, fs, plot = False, freq_axis = False):
         return abs_fft_tot_X/number, freqaxis
     else:
         return abs_fft_tot_X/number
+
+
+
+def moving_window_hv(data_horizontal, data_vertical):
+
+    fft_vertical = fftpack.rfft(data_vertical)
+    fft_horizontal = fftpack.rfft(data_horizontal)
+
+    hv = fft_horizontal/fft_vertical
+    abs_hv = abs(hv)
+
+    return abs_hv
+
+
+def kohmachi(signal,freq_array,smooth_coeff):
+    x = signal
+    f = freq_array
+    b = smooth_coeff
+
+    if round(b) != b:
+        b = round(b)   # round non integers
+    if np.remainder(b,2) == 1:  # if b is odd
+        b = b-1  # make it even
+    if b < 2:
+        b = 2  # "cup" b value
+    if b > 100:
+        b = 100  # "cap" b value
+
+
+
+    l = len(x)
+    y = np.zeros(l)
+
+    f_shifted = f/(1+1e-4);
+    for i in range(l):
+        if (i == 0) or (i == l-1):
+            continue  # skip first and last indices for now
+        fc = f[i]
+        z = f_shifted / fc;
+
+        w = ((np.sin(b * np.log10(z)) / b) / np.log10(z)) ** 4;
+        w[np.isnan(w)] = 0;
+        y[i] = np.dot(w, x) / sum(w);
+
+    y[0] = y[1]  # calculate first and last indices
+    y[-1] = y[-2]
+
+    return y
