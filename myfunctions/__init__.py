@@ -5,6 +5,7 @@ from .signal import rm_damaged_sensors
 from .signal import xcorr
 from .signal import stacked_fft, moving_window_fft
 from .signal import butter_bandpass, butter_lowpass, butter_highpass
+from .signal import moving_window_hv, kohmachi
 
 from .geometry import intersensor_distance
 
